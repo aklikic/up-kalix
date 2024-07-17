@@ -1,0 +1,65 @@
+// Copied from the Eclipse uProtocol protos (Apache licensed), but in a different package.
+// Since the types and field numbers for the messages matched, these are wire-format identical to
+// the official protocol, but live in a different package so that we can have Scala case classes
+// instead of regular Java builders.  There's support for converting between official Java uProtocol
+// types and the Scala case classes.
+
+syntax = "proto3";
+
+package com.lightbend.uprotocol.model.subscription;
+
+option java_package = "com.lightbend.uprotocol.model.subscription";
+
+import "com/lightbend/uprotocol/model/common.proto";
+import "google/protobuf/any.proto";
+import "google/protobuf/timestamp.proto";
+
+message SubscribeAttributes {
+  google.protobuf.Timestamp expire = 1;
+  repeated google.protobuf.Any details = 2;
+  optional uint32 sample_period_ms = 3;
+}
+
+message EntityOutputId {
+  int32 outputId = 1;
+}
+
+message SubscriberInfo {
+  common.UUri uri = 1;
+  repeated google.protobuf.Any details = 2;
+}
+
+message SubscriptionStatus {
+  enum State {
+    UNSUBSCRIBED = 0;
+	SUBSCRIBE_PENDING = 1;
+	SUBSCRIBED = 2;
+	UNSUBSCRIBE_PENDING = 3;
+  }
+
+  State state = 1;
+  common.UCode code = 2;
+  string message = 3;
+}
+
+message EventDeliveryConfig {
+  string id = 1;
+  string type = 2;
+  map <string, google.protobuf.Any> attributes = 3;
+}
+
+message ResetRequest {
+  optional Reason reason = 1;
+  optional google.protobuf.Timestamp before = 2;
+
+  message Reason {
+  	Code code = 1;
+	optional string message = 2;
+
+	enum Code {
+	  UNSPECIFIED = 0;
+	  FACTORY_RESET = 1;
+	  CORRUPTED_DATA = 2;
+	}
+  }
+}

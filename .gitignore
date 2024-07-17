@@ -1,0 +1,6 @@
+/target/
+/.bsp/
+/.idea/
+/project/target/
+/project/project/
+/src/test/resources/target/

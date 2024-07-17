@@ -1,0 +1,57 @@
+syntax = "proto3";
+
+package com.lightbend.uprotocol.domain;
+
+import "google/protobuf/timestamp.proto";
+import "com/lightbend/uprotocol/model/subscription.proto";
+
+// the events
+message Subscribed {
+  com.lightbend.uprotocol.model.subscription.SubscriberInfo subscriber = 1;
+  com.lightbend.uprotocol.model.subscription.SubscribeAttributes attributes = 2;
+  google.protobuf.Timestamp asOf = 3;
+  uint32 outputId = 4;
+}
+
+message Unsubscribed {
+  com.lightbend.uprotocol.model.subscription.SubscriberInfo subscriber = 1;
+}
+
+message Registered {
+  com.lightbend.uprotocol.model.subscription.SubscriberInfo subscriber = 1;
+}
+
+message Unregistered {
+  com.lightbend.uprotocol.model.subscription.SubscriberInfo subscriber = 1;
+}
+
+message SubscriptionsReset {
+  google.protobuf.Timestamp before = 3;
+  optional com.lightbend.uprotocol.model.subscription.ResetRequest.Reason reason = 2;
+}
+
+// ...and the (implementation detail) state
+message TopicState {
+  // key is a "long" URI
+  map<string, SubscriptionState> subscribers = 1;
+
+  // key is a "long" URI
+  map<string, com.lightbend.uprotocol.model.subscription.SubscriberInfo> notifications = 2;
+
+  uint32 cumulative_subscriber_count = 3;
+}
+
+message SubscriptionState {
+  com.lightbend.uprotocol.model.subscription.SubscriberInfo info = 1;
+
+  // from the last Subscribed event
+  com.lightbend.uprotocol.model.subscription.SubscribeAttributes attributes = 2;
+
+  google.protobuf.Timestamp subscribedAt = 3;
+
+  com.lightbend.uprotocol.model.subscription.SubscriptionStatus status = 4;
+
+  uint32 count = 5;
+
+  uint32 outputId = 6;
+}

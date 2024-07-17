@@ -1,0 +1,52 @@
+// For the purposes of the dispatcher and subscription, a topic exposes subscribe/unsubscribe operations
+// and (strongly-consistent) queries on the cumulative subscribe/unsubscribe operations
+
+// This should not be confused with the uProtocol service description!
+
+syntax = "proto3";
+
+package com.lightbend.uprotocol;
+
+import "com/lightbend/uprotocol/model/cloudevent.proto";
+import "kalix/annotations.proto"; 
+import "google/protobuf/empty.proto";
+import "google/api/annotations.proto";
+
+message AddUEntityMetadataRequest {
+  string entityName = 1 [(kalix.field).id = true];
+  uint32 outputId = 2;
+}
+
+message FetchUEntityMetadataRequest {
+  string entityName = 1 [(kalix.field).id = true];
+}
+
+message FetchUEntityMetadataResponse {
+  uint32 outputId = 1;
+}
+
+service UEntityMetadatas {
+  option (kalix.codegen) = {
+    event_sourced_entity: {
+      name: "com.lightbend.uprotocol.domain.UEntityMetadata"
+      type_id: "entitymetadata"
+      state: "com.lightbend.uprotocol.domain.UEntityMetadataState"
+      events: [
+        "com.lightbend.uprotocol.domain.UEntityMetadataAdded"
+      ]
+    }
+  };
+
+  rpc AddUEntityMetadata(AddUEntityMetadataRequest) returns (google.protobuf.Empty){
+    option (google.api.http) = {
+      post: "/uentity/{entityName}/add"
+      body: "*"
+    };
+  }
+  rpc FetchUEntityMetadata(FetchUEntityMetadataRequest) returns (FetchUEntityMetadataResponse){
+    option (google.api.http) = {
+      get: "/uentity/{entityName}"
+    };
+  }
+}
+

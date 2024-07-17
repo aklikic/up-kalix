@@ -1,0 +1,124 @@
+// Copied from the Eclipse uProtocol protos (Apache licensed), but in a different package.
+// Since the types and field numbers for the messages match, these are wire-format identical to
+// the official protocol, but live in a different package so that we can have Scala case classes
+// instead of regular Java builders.  There's support for converting between official Java uProtocol
+// types and the Scala case classes.
+
+syntax = "proto3";
+
+package com.lightbend.uprotocol.model.common;
+
+option java_package = "com.lightbend.uprotocol.model.common";
+
+message UUri {
+  UAuthority authority = 1;
+  UEntity entity = 2;
+  UResource resource = 3;
+}
+
+message UAuthority {
+  optional string name = 1;
+  oneof number {
+  	bytes ip = 2;
+	bytes id = 3;
+  }
+}
+
+message UEntity {
+  string name = 1;
+  optional uint32 id = 2;
+  optional uint32 version_major = 3;
+  optional uint32 version_minor = 4;
+}
+
+message UResource {
+  string name = 1;
+  optional string instance = 2;
+  optional string message = 3;
+  optional uint32 id = 4;
+}
+
+enum UCode {
+  OK = 0;
+  CANCELLED = 1;
+  UNKNOWN = 2;
+  INVALID_ARGUMENT = 3;
+  DEADLINE_EXCEEDED = 4;
+  NOT_FOUND = 5;
+  ALREADY_EXISTS = 6;
+  PERMISSION_DENIED = 7;
+  UNAUTHENTICATES = 8;
+  RESOURCE_EXHAUSTED = 9;
+  FAILED_PRECONDITION = 10;
+  ABORTED = 11;
+  OUT_OF_RANGE = 12;
+  UNIMPLEMENTED = 13;
+  INTERNAL = 14;
+  UNAVAILABLE = 15;
+  DATA_LOSS = 16;
+}
+
+message UMessage {
+  UAttributes attributes = 1;
+  UPayload payload = 2;
+}
+
+message UAttributes {
+  UUID id = 1;
+  UMessageType msg_type = 2;
+  UUri source = 3;
+  UUri sink = 4;
+  UPriority priority = 5;
+  optional uint32 ttl = 6;
+  optional uint32 permission_level = 7;
+  optional UCode commstatus = 8;
+  UUID reqid = 9;
+  optional string token = 10;
+  optional string traceparent = 11;
+}
+
+message UPayload {
+  oneof data {
+    fixed64 reference = 1;
+	bytes value = 2;
+  }
+
+  optional int32 length = 3;
+  UPayloadFormat format = 4;
+}
+
+message UUID {
+  fixed64 msb = 1;
+  fixed64 lsb = 2;
+}
+
+enum UMessageType {
+  UMESSAGE_TYPE_UNSPECIFIED = 0;
+  UMESSAGE_TYPE_PUBLISH = 1;
+  UMESSAGE_TYPE_REQUEST = 2;
+  UMESSAGE_TYPE_RESPONSE = 3;
+  UMESSAGE_TYPE_NOTIFICATION = 4;
+}
+
+enum UPriority {
+  UPRIORITY_UNSPECIFIED = 0;
+  UPRIORITY_CS0 = 1;
+  UPRIORITY_CS1 = 2;
+  UPRIORITY_CS2 = 3;
+  UPRIORITY_CS3 = 4;
+  UPRIORITY_CS4 = 5;
+  UPRIORITY_CS5 = 6;
+  UPRIORITY_CS6 = 7;
+}
+
+enum UPayloadFormat {
+  UPAYLOAD_FORMAT_UNSPECIFIED = 0;
+  UPAYLOAD_FORMAT_PROTOBUF_WRAPPED_IN_ANY = 1;
+  UPAYLOAD_FORMAT_PROTOBUF = 2;
+  UPAYLOAD_FORMAT_JSON = 3;
+  UPAYLOAD_FORMAT_SOMEIP = 4;
+  UPAYLOAD_FORMAT_SOMEIP_TLV = 5;
+  UPAYLOAD_FORMAT_RAW = 6;
+  UPAYLOAD_FORMAT_TEXT = 7;
+  UPAYLOAD_FORMAT_SHM = 8;
+}

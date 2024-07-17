@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package com.lightbend.uprotocol.domain;
+
+import "google/protobuf/timestamp.proto";
+import "com/lightbend/uprotocol/model/subscription.proto";
+
+// the events
+message UEntityMetadataAdded {
+  uint32 outputId = 1;
+}
+// ...and the (implementation detail) state
+message UEntityMetadataState {
+  uint32 outputId = 1;
+}

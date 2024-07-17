@@ -1,0 +1,83 @@
+// For the purposes of the dispatcher and subscription, a topic exposes subscribe/unsubscribe operations
+// and (strongly-consistent) queries on the cumulative subscribe/unsubscribe operations
+
+// This should not be confused with the uProtocol service description!
+
+syntax = "proto3";
+
+package com.lightbend.uprotocol;
+
+import "com/lightbend/uprotocol/model/common.proto";
+import "com/lightbend/uprotocol/model/subscription.proto";
+import "kalix/annotations.proto"; 
+import "google/protobuf/empty.proto";
+import "google/api/annotations.proto";
+
+message RequestToSubscribe {
+  string topic = 1 [(kalix.field).id = true];
+  model.subscription.SubscriberInfo subscriber = 2;
+  model.subscription.SubscribeAttributes attributes = 3;
+  uint32 outputId = 4;
+}
+
+message RequestToUnsubscribe {
+  string topic = 1 [(kalix.field).id = true];
+  model.subscription.SubscriberInfo subscriber = 2;
+}
+
+message FetchRequest {
+  string topic = 1 [(kalix.field).id = true];
+  optional uint32 offset = 2;
+}
+
+message FetchItem{
+  model.subscription.SubscriberInfo subscriber = 1;
+  uint32 outputId = 2;
+}
+
+message FetchResponse {
+  repeated FetchItem items = 1;
+  optional uint32 last_offset = 2;
+}
+
+message SubscriptionResponse {
+  model.subscription.SubscriptionStatus status = 1;
+  model.subscription.EventDeliveryConfig config = 2;
+  model.common.UUri topic = 3;
+}
+
+service Topics {
+  option (kalix.codegen) = {
+    event_sourced_entity: {
+      name: "com.lightbend.uprotocol.domain.Topic"
+      type_id: "topic"
+      state: "com.lightbend.uprotocol.domain.TopicState"
+      events: [
+        "com.lightbend.uprotocol.domain.Subscribed"
+      , "com.lightbend.uprotocol.domain.Unsubscribed"
+      , "com.lightbend.uprotocol.domain.Registered"
+      , "com.lightbend.uprotocol.domain.Unregistered"
+      , "com.lightbend.uprotocol.domain.SubscriptionsReset"
+      ]
+    }
+  };
+
+  rpc Subscribe(RequestToSubscribe) returns (SubscriptionResponse){
+    option (google.api.http) = {
+      post: "/topic/{topic}/subscribe"
+      body: "*"
+    };
+  }
+  rpc Unsubscribe(RequestToUnsubscribe) returns (google.protobuf.Empty){
+    option (google.api.http) = {
+      post: "/topic/{topic}/unsubscribe"
+      body: "*"
+    };
+  }
+  rpc FetchSubscribers(FetchRequest) returns (FetchResponse){
+    option (google.api.http) = {
+      get: "/topic/{topic}"
+    };
+  }
+}
+
